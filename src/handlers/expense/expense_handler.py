@@ -33,7 +33,10 @@ class ExpenseCreateHandler:
 
     async def handle_set_expense_amount(self, message: Message, state: FSMContext):
         """Handle the 'Додати витрату' button."""
-        await self.fsm_service.set_amount(state, message.from_user.id, message.text)
+        msg = await self.fsm_service.set_amount(
+            state, message.from_user.id, message.text
+        )
+        await message.answer(msg)
 
 
 class ExpenseGetReportHandler:
