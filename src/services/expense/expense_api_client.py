@@ -13,7 +13,7 @@ class ExpenseAPIClient:
 
     async def get_expenses(self, user_id: int) -> List[Dict]:
         try:
-            return await self.api_client.get("/", user_id)
+            return await self.api_client.get("/expenses", user_id)
 
         except ClientResponseError as e:
             logger.error(f"Error getting expenses: {e}")
@@ -25,7 +25,7 @@ class ExpenseAPIClient:
         """Get the expenses report for the user."""
         try:
             return await self.api_client.get(
-                f"/report/{report_type}?start_date={start_date}&end_date={end_date}",  # TODO: Add prefix "excel"
+                f"/expenses/report/{report_type}?start_date={start_date}&end_date={end_date}",  # TODO: Add prefix "excel"
                 user_id,
                 response_type="bytes",
             )
@@ -37,7 +37,9 @@ class ExpenseAPIClient:
         """Add a new expense for the user."""
         logger.debug(f"Adding expense for user {user_id}: {expense_data}")
         try:
-            response = await self.api_client.post(f"/", user_id, json=expense_data)
+            response = await self.api_client.post(
+                f"/expenses", user_id, json=expense_data
+            )
             return response
         except ClientResponseError as e:
             print(f"Error adding expense: {e}")
@@ -46,8 +48,8 @@ class ExpenseAPIClient:
     async def update_expense(self, user_id: int, expense_id: int, update_data: dict):
         """Update an existing expense for the user."""
         try:
-            response = await self.api_client.put(
-                f"/{expense_id}", user_id, json=update_data
+            response = await self.api_client.patch(
+                f"/expenses/{expense_id}", user_id, json=update_data
             )
             return response
         except ClientResponseError as e:
@@ -57,7 +59,7 @@ class ExpenseAPIClient:
     async def delete_expense(self, user_id: int, expense_id: int):
         """Delete an existing expense for the user."""
         try:
-            response = await self.api_client.delete(f"/{expense_id}", user_id)
+            response = await self.api_client.delete(f"/expenses/{expense_id}", user_id)
             return response
         except ClientResponseError as e:
             print(f"Error deleting expense: {e}")
