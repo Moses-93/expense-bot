@@ -70,7 +70,17 @@ class ExpenseRouter:
         )
 
         self.router.callback_query.register(
-            update_handler.handle_update_expense, expenses.UpdateExpenseState.EXPENSE_ID
+            update_handler.set_expense_id, expenses.UpdateExpenseState.EXPENSE_ID
+        )
+
+        self.router.message.register(
+            update_handler.set_new_expense_name,
+            expenses.UpdateExpenseState.NAME
+        )
+
+        self.router.message.register(
+            update_handler.set_new_expense_date,
+            expenses.UpdateExpenseState.DATE
         )
 
         self.router.message.register(
