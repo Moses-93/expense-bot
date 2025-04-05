@@ -29,5 +29,5 @@ class DeleteFSMService:
 
     async def delete_expense(self, user_id: int, expense_id: int, state: FSMContext):
         await state.clear()
-        await self.expense_api_client.update_expense(user_id, expense_id)
+        await self.expense_api_client.delete_expense(user_id, expense_id)
         return MESSAGES["success_update"]
