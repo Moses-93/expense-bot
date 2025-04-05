@@ -4,6 +4,7 @@ from typing import Tuple
 from src.services.expense.expense_api_client import ExpenseAPIClient
 from src.states.expenses import UpdateExpenseState
 from src.services.expense.validators import ExpenseValidator
+from src.keyboards.display_data_keyboard import DisplayData
 
 
 MESSAGES = {
@@ -29,16 +30,20 @@ class UpdateFSMService:
         self, user_id: int, state: FSMContext
     ) -> Tuple[str, InlineKeyboardMarkup]:
         expenses = await self.expense_api_client.get_expenses(user_id)
+        if not expenses:
+            return MESSAGES["not_found"]
         await state.set_state(UpdateExpenseState.EXPENSE_ID)
-        return (MESSAGES["start_update_expense"],)  # TODO: Add keyboard
+        return (MESSAGES["start"], DisplayData.generate_keyboard(expenses, "name", "id"))
 
     async def set_expense_id(self, expense_id: int, state: FSMContext):
-        await state.set_data(id=expense_id)
-        return MESSAGES["success_update"]
+        await state.update_data(id=expense_id)
+        await state.set_state(UpdateExpenseState.NAME)
+        return MESSAGES["set_new_name"]
 
     async def set_new_name(self, name: str, state: FSMContext):
-        await state.set_data(name=name)
-        return MESSAGES["set_new_name"]
+        await state.update_data(name=name)
+        await state.set_state(UpdateExpenseState.DATE)
+        return MESSAGES["set_new_date"]
 
     async def set_new_date(self, user_id: int, date: str, state: FSMContext):
         try:
