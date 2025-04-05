@@ -11,7 +11,7 @@ class HandlerFactory:
     def __init__(self):
         logger.debug("Initializing HandlerFactory")
         self.router = Router()
-        self.api_client = APIClient("http://localhost:8000")
+        self.api_client = APIClient("http://localhost:8000/api")
         self.expense_factory = ExpenseFactory(self.api_client)
 
     def get_router(self) -> Router:
