@@ -41,11 +41,15 @@ class UpdateFSMService:
         return MESSAGES["set_new_name"]
 
     async def set_new_date(self, user_id: int, date: str, state: FSMContext):
-        if not await self.validator.is_valid_date(date):
-            return MESSAGES["invalid_date"]
-        await state.set_data(date=date)
-        expense_data = await state.get_data()
-        expense_id = expense_data.pop("id")
-        return await self.expense_api_client.update_expense(
-            user_id, expense_id, expense_data
-        )
+        try:
+            if not self.validator.is_valid_date(date):
+                return MESSAGES["invalid_date"]
+            await state.update_data(date=date)
+            expense_data = await state.get_data()
+            expense_id = expense_data.pop("id")
+            response = await self.expense_api_client.update_expense(
+                user_id, expense_id, expense_data
+            )
+            return MESSAGES["success_update"] if response else MESSAGES["error_update"]
+        finally:
+            await state.clear()
