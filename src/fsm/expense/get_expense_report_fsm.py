@@ -37,6 +37,7 @@ class GetReportFSMService:
             await state.clear()
             return MESSAGES["invalid_date"]
         data = await state.get_data()
-        return await self.expense_report_service.get_expenses_report(
+        report = await self.expense_report_service.get_expenses_report(
             user_id, data["start_date"], data["end_date"]
         )
+        return MESSAGES["success"], (report if report else MESSAGES["report_error"])
