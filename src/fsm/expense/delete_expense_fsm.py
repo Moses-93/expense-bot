@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardMarkup
 from src.services.expense.expense_api_client import ExpenseAPIClient
 from src.states.expenses import DeleteExpenseState
 from src.services.expense.validators import ExpenseValidator
+from src.keyboards.display_data_keyboard import DisplayData
 
 
 MESSAGES = {
@@ -25,7 +26,7 @@ class DeleteFSMService:
     ) -> Tuple[str, InlineKeyboardMarkup]:
         expenses = await self.expense_api_client.get_expenses(user_id)
         await state.set_state(DeleteExpenseState.EXPENSE_ID)
-        return (MESSAGES["start_update_expense"],)  # TODO: Add keyboard
+        return (MESSAGES["start"], DisplayData.generate_keyboard(expenses, "name", "id"))
 
     async def delete_expense(self, user_id: int, expense_id: int, state: FSMContext):
         await state.clear()
