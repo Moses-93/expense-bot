@@ -54,7 +54,7 @@ class ExpenseGetReportHandler:
 
     async def handle_generate_expense_report(self, message: Message, state: FSMContext):
         await state.update_data(end_date=message.text)
-        report, msg = await self.fsm_service.set_end_date(
+        msg, report = await self.fsm_service.set_end_date(
             message.from_user.id, message.text, state
         )
 
