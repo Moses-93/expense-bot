@@ -27,6 +27,9 @@ class DeleteFSMService:
         self, user_id: int, state: FSMContext
     ) -> Tuple[str, InlineKeyboardMarkup]:
         expenses = await self.expense_api_client.get_expenses(user_id)
+        if not expenses:
+            await state.clear()
+            return MESSAGES["not_found"]
         await state.set_state(DeleteExpenseState.EXPENSE_ID)
         return (MESSAGES["start"], DisplayData.generate_keyboard(expenses, "name", "id"))
 
