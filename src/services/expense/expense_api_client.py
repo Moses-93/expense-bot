@@ -37,10 +37,7 @@ class ExpenseAPIClient:
         """Add a new expense for the user."""
         logger.debug(f"Adding expense for user {user_id}: {expense_data}")
         try:
-            response = await self.api_client.post(
-                f"/expenses", user_id, json=expense_data
-            )
-            return response
+            return await self.api_client.post(f"/expenses", user_id, json=expense_data)
         except ClientResponseError as e:
             print(f"Error adding expense: {e}")
             return None
@@ -48,10 +45,9 @@ class ExpenseAPIClient:
     async def update_expense(self, user_id: int, expense_id: int, update_data: dict):
         """Update an existing expense for the user."""
         try:
-            response = await self.api_client.patch(
+            return await self.api_client.patch(
                 f"/expenses/{expense_id}", user_id, json=update_data
             )
-            return response
         except ClientResponseError as e:
             print(f"Error updating expense: {e}")
             return None
@@ -59,8 +55,7 @@ class ExpenseAPIClient:
     async def delete_expense(self, user_id: int, expense_id: int):
         """Delete an existing expense for the user."""
         try:
-            response = await self.api_client.delete(f"/expenses/{expense_id}", user_id)
-            return response
+            return await self.api_client.delete(f"/expenses/{expense_id}", user_id)
         except ClientResponseError as e:
             print(f"Error deleting expense: {e}")
             return None
