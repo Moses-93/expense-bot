@@ -45,6 +45,9 @@ class AddExpenseFSMService:
         data = await state.get_data()
         data["amount"] = amount
 
-        await self.expense_api_client.create_expense(user_id=user_id, expense_data=data)
+        created_expense = await self.expense_api_client.create_expense(
+            user_id=user_id, expense_data=data
+        )
+        if created_expense:
+            return MESSAGES["success_create_expense"]
         await state.clear()
-        return "Витрата додана. Молодець!"
