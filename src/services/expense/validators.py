@@ -3,7 +3,7 @@ from datetime import datetime
 
 class ExpenseValidator:
 
-    async def is_valid_date(self, date: str) -> bool:
+    def is_valid_date(self, date: str) -> bool:
         """
         Validate if the given string represents a valid date in YYYY-MM-DD format.
 
@@ -19,7 +19,7 @@ class ExpenseValidator:
         except ValueError:
             return False
 
-    async def is_valid_amount(self, amount: str) -> bool:
+    def is_valid_amount(self, amount: str) -> bool:
         """
         Validate if the given string represents a valid float number.
 
