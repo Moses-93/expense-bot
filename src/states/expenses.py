@@ -24,3 +24,5 @@ class DeleteExpenseState(StatesGroup):
 class UpdateExpenseState(StatesGroup):
 
     EXPENSE_ID = State()
+    NAME = State()
+    DATE = State()
