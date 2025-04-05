@@ -9,8 +9,8 @@ MESSAGES = {
     "set_date": "📅 Тепер вкажи дату у форматі **РРРР-ММ-ДД**. Наприклад: 2024-05-20. Можеш навіть взяти з майбутнього! 😉",
     "set_amount": "💸 Сума у гривнях (з копійками, якщо є). Наприклад: 150 або 75.50. Так-так, навіть дрібнички враховуємо!",
     "success_create_expense": "✅ Супер! Витрату додано. Можеш перевірити, чи не забув(ла) щось? 😊",
-    "error_input_date": "❌ Ой, щось не так з датою! Спробуй ще раз у форматі **РРРР-ММ-ДД**. Наприклад: 2024-12-31.",
-    "error_amount": "❌ Упс, сума має бути числом (крапка замість коми). Давай ще раз: 100 або 50.25.",
+    "invalid_date": "❌ Ой, щось не так з датою! Спробуй ще раз у форматі **РРРР-ММ-ДД**. Наприклад: 2024-12-31.",
+    "invalid_amount": "❌ Упс, сума має бути числом (крапка замість коми). Давай ще раз: 100 або 50.25.",
 }
 
 
@@ -32,7 +32,7 @@ class AddExpenseFSMService:
 
     async def set_date(self, state: FSMContext, date: str):
         if not self.validator.is_valid_date(date):
-            return MESSAGES["error_input_date"]
+            return MESSAGES["invalid_date"]
 
         await state.update_data(date=date)
         await state.set_state(AddExpenseStates.ADD_EXPENSE_AMOUNT)
@@ -40,7 +40,7 @@ class AddExpenseFSMService:
 
     async def set_amount(self, state: FSMContext, user_id: int, amount: str):
         if not self.validator.is_valid_amount(amount):
-            return MESSAGES["error_amount"]
+            return MESSAGES["invalid_amount"]
 
         data = await state.get_data()
         data["amount"] = amount
