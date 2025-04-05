@@ -66,7 +66,7 @@ class ExpenseRouter:
 
         self.router.message.register(
             update_handler.handle_start_update_expense,
-            F.text == "🔄 Оновити витрату",
+            F.text == "✏️ Редагувати витрату",
         )
 
         self.router.callback_query.register(
