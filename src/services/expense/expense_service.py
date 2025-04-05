@@ -22,6 +22,10 @@ class ExpenseReportService:
         byte_report = await self.expense_api_client.get_expenses_report(
             user_id, start_date, end_date, report_type
         )
-        return await self.format_report_from_bytes(
-            byte_report, f"ExpenseReport_{start_date}_{end_date}"
+        return (
+            await self.format_report_from_bytes(
+                byte_report, f"ExpenseReport_{start_date}_{end_date}.xlsx"
+            )
+            if byte_report
+            else None
         )
