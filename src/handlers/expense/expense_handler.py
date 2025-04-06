@@ -20,23 +20,23 @@ class ExpenseCreateHandler:
 
     async def handle_add_expense(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.start(state)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode="Markdown")
 
     async def handle_set_expense_name(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.set_name(state, message.text)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode="Markdown")
 
     async def handle_set_expense_date(self, message: Message, state: FSMContext):
         """Handle the 'Додати витрату' button."""
         msg = await self.fsm_service.set_date(state, message.text)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode="Markdown")
 
     async def handle_set_expense_amount(self, message: Message, state: FSMContext):
         """Handle the 'Додати витрату' button."""
         msg = await self.fsm_service.set_amount(
             state, message.from_user.id, message.text
         )
-        await message.answer(msg)
+        await message.answer(msg, parse_mode="Markdown")
 
 
 class ExpenseGetReportHandler:
@@ -46,11 +46,11 @@ class ExpenseGetReportHandler:
 
     async def handle_start_expense_report(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.start(state)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode="Markdown")
 
     async def handle_set_report_start_date(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.set_start_date(message.text, state)
-        await message.answer(msg)
+        await message.answer(msg, parse_mode="Markdown")
 
     async def handle_generate_expense_report(self, message: Message, state: FSMContext):
         await state.update_data(end_date=message.text)
@@ -74,23 +74,23 @@ class ExpenseUpdateHandler:
 
     async def set_expense_id(self, callback: CallbackQuery, state: FSMContext):
         msg = await self.fsm_service.set_expense_id(callback.data, state)
-        await callback.message.answer(msg)
+        await callback.message.answer(msg, parse_mode="Markdown")
 
     async def set_new_expense_name(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.set_new_name(message.text, state)
-        await message.answer(text=msg)
+        await message.answer(text=msg, parse_mode="Markdown")
 
     async def set_new_expense_date(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.set_new_date(
             message.from_user.id, message.text, state
         )
-        await message.answer(text=msg)
+        await message.answer(text=msg, parse_mode="Markdown")
 
     async def handle_update_expense(self, callback: CallbackQuery, state: FSMContext):
         msg = await self.fsm_service.set_expense_id(
             callback.from_user.id, callback.data, state
         )
-        await callback.message.answer(text=msg)
+        await callback.message.answer(text=msg, parse_mode="Markdown")
 
 
 class ExpenseDeleteHandler:
@@ -108,4 +108,4 @@ class ExpenseDeleteHandler:
         msg = await self.fsm_service.delete_expense(
             callback.from_user.id, callback.data, state
         )
-        await callback.message.answer(msg)
+        await callback.message.answer(msg, parse_mode="Markdown")
