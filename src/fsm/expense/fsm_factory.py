@@ -31,10 +31,10 @@ class ExpenseFSMFactory:
 
     def create_update_fsm_service(self):
         return update_expense_fsm.UpdateFSMService(
-            self.validator, self.expense_api_client
+            self.validator, self.expense_api_client, self.report_service
         )
 
     def create_delete_fsm_service(self):
         return delete_expense_fsm.DeleteFSMService(
-            self.validator, self.expense_api_client
+            self.validator, self.expense_api_client, self.report_service
         )
