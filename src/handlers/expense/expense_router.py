@@ -34,6 +34,22 @@ class ExpenseRouter:
             create_handler.handle_add_expense,
             F.text == "➕ Додати витрату",
         )
+
+        self.router.message.register(
+            report_handler.handle_start_expense_report,
+            F.text == "📊 Мої витрати",
+        )
+
+        self.router.message.register(
+            update_handler.handle_start_update_expense,
+            F.text == "✏️ Редагувати витрату",
+        )
+
+        self.router.message.register(
+            delete_handler.start,
+            F.text == "❌ Видалити витрату",
+        )
+
         self.router.message.register(
             create_handler.handle_set_expense_name,
             expenses.AddExpenseStates.ADD_EXPENSE_NAME,
@@ -50,11 +66,6 @@ class ExpenseRouter:
         )
 
         self.router.message.register(
-            report_handler.handle_start_expense_report,
-            F.text == "📊 Мої витрати",
-        )
-
-        self.router.message.register(
             report_handler.handle_set_report_start_date,
             expenses.GetExpensesReportStates.START_DATE,
         )
@@ -64,28 +75,16 @@ class ExpenseRouter:
             expenses.GetExpensesReportStates.END_DATE,
         )
 
-        self.router.message.register(
-            update_handler.handle_start_update_expense,
-            F.text == "✏️ Редагувати витрату",
-        )
-
         self.router.callback_query.register(
             update_handler.set_expense_id, expenses.UpdateExpenseState.EXPENSE_ID
         )
 
         self.router.message.register(
-            update_handler.set_new_expense_name,
-            expenses.UpdateExpenseState.NAME
+            update_handler.set_new_expense_name, expenses.UpdateExpenseState.NAME
         )
 
         self.router.message.register(
-            update_handler.set_new_expense_date,
-            expenses.UpdateExpenseState.DATE
-        )
-
-        self.router.message.register(
-            delete_handler.start,
-            F.text == "❌ Видалити витрату",
+            update_handler.set_new_expense_date, expenses.UpdateExpenseState.DATE
         )
 
         self.router.callback_query.register(
