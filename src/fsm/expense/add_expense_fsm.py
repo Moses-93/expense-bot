@@ -22,6 +22,7 @@ class AddExpenseFSMService:
         self.expense_api_client = expense_api_client
 
     async def start(self, state: FSMContext):
+        await state.clear()
         await state.set_state(AddExpenseStates.ADD_EXPENSE_NAME)
         return MESSAGES["start_add_expense"]
 

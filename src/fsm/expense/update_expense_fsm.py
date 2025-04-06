@@ -14,7 +14,7 @@ MESSAGES = {
     "success_update": "🎉 Вуаля! Витрату успішно оновлено! Тепер все виглядає супер!",
     "invalid_date": "🤔 Ой-ой, здається дата невірна. Спробуй ще раз у форматі РРРР-ММ-ДД, наприклад 2024-12-31",
     "not_found": "🤷‍♂️ Хмм... Схоже, тут пусто! Як щодо створити свою першу статтю витрат?",
-    "error_update": "🔧 Щось пішло не так при оновленні. Не хвилюйся, це тимчасово! Спробуй ще раз за 5 хвилин."
+    "error_update": "🔧 Щось пішло не так при оновленні. Не хвилюйся, це тимчасово! Спробуй ще раз за 5 хвилин.",
 }
 
 
@@ -29,11 +29,15 @@ class UpdateFSMService:
     async def start_update_expenses(
         self, user_id: int, state: FSMContext
     ) -> Tuple[str, InlineKeyboardMarkup]:
+        await state.clear()
         expenses = await self.expense_api_client.get_expenses(user_id)
         if not expenses:
             return MESSAGES["not_found"]
         await state.set_state(UpdateExpenseState.EXPENSE_ID)
-        return (MESSAGES["start"], DisplayData.generate_keyboard(expenses, "name", "id"))
+        return (
+            MESSAGES["start"],
+            DisplayData.generate_keyboard(expenses, "name", "id"),
+        )
 
     async def set_expense_id(self, expense_id: int, state: FSMContext):
         await state.update_data(id=expense_id)

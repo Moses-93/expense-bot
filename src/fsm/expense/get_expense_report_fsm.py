@@ -21,6 +21,7 @@ class GetReportFSMService:
         self.expense_report_service = expense_report_service
 
     async def start(self, state: FSMContext):
+        await state.clear()
         await state.set_state(GetExpensesReportStates.START_DATE)
         return MESSAGES["start"]
 
