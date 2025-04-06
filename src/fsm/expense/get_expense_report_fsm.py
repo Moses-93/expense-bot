@@ -36,7 +36,7 @@ class GetReportFSMService:
     async def set_end_date(self, user_id: int, end_date: str, state: FSMContext):
         if not self.validator.is_valid_date(end_date):
             await state.clear()
-            return MESSAGES["invalid_date"]
+            return MESSAGES["invalid_date"], None
         data = await state.get_data()
         report = await self.expense_report_service.get_expenses_report(
             user_id, data["start_date"], data["end_date"]

@@ -57,8 +57,9 @@ class ExpenseGetReportHandler:
         msg, report = await self.fsm_service.set_end_date(
             message.from_user.id, message.text, state
         )
-
-        await message.answer_document(report, caption=msg)
+        if report:
+            return await message.answer_document(report, caption=msg)
+        await message.answer(msg)
 
 
 class ExpenseUpdateHandler:

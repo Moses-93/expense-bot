@@ -30,7 +30,7 @@ class DeleteFSMService:
         expenses = await self.expense_api_client.get_expenses(user_id)
         if not expenses:
             await state.clear()
-            return MESSAGES["not_found"]
+            return MESSAGES["not_found"], None
         await state.set_state(DeleteExpenseState.EXPENSE_ID)
         return (
             MESSAGES["start"],
