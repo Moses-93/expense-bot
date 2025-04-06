@@ -75,9 +75,11 @@ class ExpenseUpdateHandler:
             return await message.answer_document(report, caption=msg)
         await message.answer(msg)
 
-    async def set_expense_id(self, callback: CallbackQuery, state: FSMContext):
-        msg = await self.fsm_service.set_expense_id(callback.data, state)
-        await callback.message.answer(msg, parse_mode="Markdown")
+    async def set_expense_id(self, message: Message, state: FSMContext):
+        msg = await self.fsm_service.set_expense_id(
+            message.from_user.id, message.text, state
+        )
+        await message.answer(msg, parse_mode="Markdown")
 
     async def set_new_expense_name(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.set_new_name(message.text, state)
@@ -109,8 +111,8 @@ class ExpenseDeleteHandler:
             return await message.answer_document(report, caption=msg)
         await message.answer(msg)
 
-    async def handle_delete_expense(self, callback: CallbackQuery, state: FSMContext):
+    async def handle_delete_expense(self, message: Message, state: FSMContext):
         msg = await self.fsm_service.delete_expense(
-            callback.from_user.id, callback.data, state
+            message.from_user.id, message.text, state
         )
-        await callback.message.answer(msg, parse_mode="Markdown")
+        await message.answer(msg, parse_mode="Markdown")
