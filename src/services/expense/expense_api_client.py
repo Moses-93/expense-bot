@@ -1,6 +1,7 @@
 import logging
-from typing import Dict, List
+from typing import Optional
 from aiohttp import ClientResponseError
+from yarl import URL
 from src.services.api_client import APIClient
 
 
@@ -11,21 +12,38 @@ class ExpenseAPIClient:
     def __init__(self, api_client: APIClient):
         self.api_client = api_client
 
-    async def get_expenses(self, user_id: int) -> List[Dict]:
+    async def get_expense(self, user_id: int, expense_id: int):
         try:
-            return await self.api_client.get("/expenses", user_id)
-
+            return await self.api_client.get(f"/expenses/{expense_id}", user_id)
         except ClientResponseError as e:
-            logger.error(f"Error getting expenses: {e}")
+            logger.error(f"Error getting expenses report: {e}")
             return None
 
     async def get_expenses_report(
-        self, user_id: int, start_date: str, end_date: str, report_type: str = "excel"
-    ) -> bytes:
+        self,
+        user_id: int,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        all_expenses: Optional[bool] = None,
+        report_type: str = "excel",
+    ) -> Optional[bytes]:
         """Get the expenses report for the user."""
         try:
+            base_url = f"/expenses/report/{report_type}"
+            query_params = {}
+
+            if all_expenses:
+                query_params["all_expenses"] = "true"
+            else:
+                if start_date:
+                    query_params["start_date"] = start_date
+                if end_date:
+                    query_params["end_date"] = end_date
+
+            full_url = str(URL(base_url).with_query(query_params))
+
             return await self.api_client.get(
-                f"/expenses/report/{report_type}?start_date={start_date}&end_date={end_date}",  # TODO: Add prefix "excel"
+                full_url,
                 user_id,
                 response_type="bytes",
             )
