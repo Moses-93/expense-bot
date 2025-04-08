@@ -64,7 +64,7 @@ class UpdateFSMService:
             if valid_date is None:
                 await state.clear()
                 return MESSAGES["invalid_date"]
-            await state.update_data(date=date)
+            await state.update_data(date=valid_date)
             expense_data = await state.get_data()
             expense_id = expense_data.pop("id")
             response = await self.expense_api_client.update_expense(

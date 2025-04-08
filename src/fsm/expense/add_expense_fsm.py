@@ -37,7 +37,7 @@ class AddExpenseFSMService:
             await state.clear()
             return MESSAGES["invalid_date"]
 
-        await state.update_data(date=date)
+        await state.update_data(date=valid_date)
         await state.set_state(AddExpenseStates.ADD_EXPENSE_AMOUNT)
         return MESSAGES["set_amount"]
 

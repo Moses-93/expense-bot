@@ -30,7 +30,7 @@ class GetReportFSMService:
         if valid_date is None:
             await state.clear()
             return MESSAGES["invalid_date"]
-        await state.update_data(start_date=start_date)
+        await state.update_data(start_date=valid_date)
         await state.set_state(GetExpensesReportStates.END_DATE)
         return MESSAGES["set_end_date"]
 
@@ -39,6 +39,7 @@ class GetReportFSMService:
         if valid_date is None:
             await state.clear()
             return MESSAGES["invalid_date"], None
+        await state.update_data(end_date=valid_date)
         data = await state.get_data()
         report = await self.expense_report_service.get_expenses_report(
             user_id, data["start_date"], data["end_date"]
