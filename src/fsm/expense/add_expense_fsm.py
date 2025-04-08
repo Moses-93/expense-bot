@@ -42,11 +42,13 @@ class AddExpenseFSMService:
         return MESSAGES["set_amount"]
 
     async def set_amount(self, state: FSMContext, user_id: int, amount: str):
-        if not self.validator.is_valid_amount(amount):
+        valid_amount = self.validator.is_valid_amount(amount)
+        if valid_amount is None:
+            await state.clear()
             return MESSAGES["invalid_amount"]
 
         data = await state.get_data()
-        data["amount"] = amount
+        data["amount"] = valid_amount
 
         created_expense = await self.expense_api_client.create_expense(
             user_id=user_id, expense_data=data
