@@ -4,7 +4,7 @@ from typing import Optional
 
 class ExpenseValidator:
 
-    def is_valid_date(self, date_str: str) -> Optional[date]:
+    def is_valid_date(self, date_str: str) -> Optional[str]:
         """
         Validate if the given string represents a valid date in the specified format.
 
@@ -12,10 +12,10 @@ class ExpenseValidator:
             date_str (str): The date string to validate
 
         Returns:
-            Optional[date]: The parsed date object if valid, None otherwise
+            Optional[str]: The parsed date str in the format 'YYYY-MM-DD' if valid, None otherwise
         """
         try:
-            return datetime.strptime(date_str, "%d.%m.%Y").date()
+            return datetime.strptime(date_str, "%d.%m.%Y").strftime("%Y-%m-%d")
         except ValueError:
             return None
 
