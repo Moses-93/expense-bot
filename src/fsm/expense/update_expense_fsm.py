@@ -60,7 +60,9 @@ class UpdateFSMService:
 
     async def set_new_date(self, user_id: int, date: str, state: FSMContext):
         try:
-            if not self.validator.is_valid_date(date):
+            valid_date = self.validator.is_valid_date(date)
+            if valid_date is None:
+                await state.clear()
                 return MESSAGES["invalid_date"]
             await state.update_data(date=date)
             expense_data = await state.get_data()

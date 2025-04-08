@@ -26,7 +26,8 @@ class GetReportFSMService:
         return MESSAGES["start"]
 
     async def set_start_date(self, start_date: str, state: FSMContext):
-        if not self.validator.is_valid_date(start_date):
+        valid_date = self.validator.is_valid_date(start_date)
+        if valid_date is None:
             await state.clear()
             return MESSAGES["invalid_date"]
         await state.update_data(start_date=start_date)
@@ -34,7 +35,8 @@ class GetReportFSMService:
         return MESSAGES["set_end_date"]
 
     async def set_end_date(self, user_id: int, end_date: str, state: FSMContext):
-        if not self.validator.is_valid_date(end_date):
+        valid_date = self.validator.is_valid_date(end_date)
+        if valid_date is None:
             await state.clear()
             return MESSAGES["invalid_date"], None
         data = await state.get_data()

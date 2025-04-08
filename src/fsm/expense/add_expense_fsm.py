@@ -32,7 +32,9 @@ class AddExpenseFSMService:
         return MESSAGES["set_date"]
 
     async def set_date(self, state: FSMContext, date: str):
-        if not self.validator.is_valid_date(date):
+        valid_date = self.validator.is_valid_date(date)
+        if valid_date is None:
+            await state.clear()
             return MESSAGES["invalid_date"]
 
         await state.update_data(date=date)
