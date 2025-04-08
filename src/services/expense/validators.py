@@ -1,36 +1,35 @@
-from datetime import datetime
+from datetime import datetime, date
+from typing import Optional
 
 
 class ExpenseValidator:
 
-    def is_valid_date(self, date: str) -> bool:
+    def is_valid_date(self, date_str: str) -> Optional[date]:
         """
-        Validate if the given string represents a valid date in YYYY-MM-DD format.
+        Validate if the given string represents a valid date in the specified format.
 
         Args:
-            date (str): The date string to validate
+            date_str (str): The date string to validate
 
         Returns:
-            bool: True if date is valid, False otherwise
+            Optional[date]: The parsed date object if valid, None otherwise
         """
         try:
-            datetime.strptime(date, "%Y-%m-%d")
-            return True
+            return datetime.strptime(date_str, "%d.%m.%Y").date()
         except ValueError:
-            return False
+            return None
 
-    def is_valid_amount(self, amount: str) -> bool:
+    def is_valid_amount(self, amount: str) -> Optional[float]:
         """
-        Validate if the given string represents a valid float number.
+        Validate if the given string represents a valid positive float number.
 
         Args:
             amount (str): The string to validate
 
         Returns:
-            bool: True if amount is a valid float, False otherwise
+            Optional[float]: The float value if valid and positive, None otherwise
         """
         try:
-            float_value = float(amount)
-            return float_value > 0
-        except ValueError:
-            return False
+            return float(amount) if float(amount) > 0 else None
+        except (ValueError, TypeError):
+            return None
