@@ -26,3 +26,4 @@ class UpdateExpenseStates(StatesGroup):
     EXPENSE_ID = State()
     NAME = State()
     DATE = State()
+    AMOUNT = State()
