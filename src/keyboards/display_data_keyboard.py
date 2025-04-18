@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
@@ -7,14 +7,14 @@ class DisplayData:
     @staticmethod
     def generate_keyboard(
         data: List[Dict],
-        text_key: str,
-        callback_key: str,
+        text_keys: Tuple[str],
+        callback_key: Tuple[str],
     ) -> InlineKeyboardMarkup:
         keyboard = [
             [
                 InlineKeyboardButton(
-                    text=i[text_key],
-                    callback_data=f"{i[callback_key]}",
+                    text=" - ".join(str(i[key]) for key in text_keys),
+                    callback_data=f"{" ".join(str(i[key]) for key in callback_key)}",
                 )
             ]
             for i in data
