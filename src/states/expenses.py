@@ -16,12 +16,12 @@ class GetExpensesReportStates(StatesGroup):
     END_DATE = State()
 
 
-class DeleteExpenseState(StatesGroup):
+class DeleteExpenseStates(StatesGroup):
 
     EXPENSE_ID = State()
 
 
-class UpdateExpenseState(StatesGroup):
+class UpdateExpenseStates(StatesGroup):
 
     EXPENSE_ID = State()
     NAME = State()
