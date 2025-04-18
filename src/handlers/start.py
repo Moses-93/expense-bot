@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-from src.keyboards.main_user_keyboard import MainUserKeyboard
+from src.keyboards.user_keyboard import MainUserKeyboard
 
 router = Router()
 
