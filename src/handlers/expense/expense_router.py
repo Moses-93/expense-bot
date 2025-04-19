@@ -36,7 +36,7 @@ class ExpenseRouter:
         )
 
         self.router.message.register(
-            report_handler.handle_start_expense_report,
+            report_handler.handle_start,
             F.text == "📊 Мої витрати",
         )
 
@@ -66,12 +66,12 @@ class ExpenseRouter:
         )
 
         self.router.message.register(
-            report_handler.handle_set_report_start_date,
+            report_handler.handle_set_start_date,
             expenses.GetExpensesReportStates.START_DATE,
         )
 
         self.router.message.register(
-            report_handler.handle_generate_expense_report,
+            report_handler.handle_set_end_date,
             expenses.GetExpensesReportStates.END_DATE,
         )
 
