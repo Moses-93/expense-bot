@@ -118,12 +118,12 @@ class ExpenseGetReportHandler(BaseExpenseHandler):
             await message.answer(str(e))
 
 
-class ExpenseUpdateHandler:
+class ExpenseUpdateHandler(BaseExpenseHandler):
     def __init__(self, api_client: APIClient):
-        self.api_client = api_client
-        self.messages = MessageManager(messages.UPDATE_EXPENSE_MESSAGES)
+        super().__init__(api_client, messages.UPDATE_EXPENSE_MESSAGES)
 
     async def handle_start_update_expense(self, message: Message, state: FSMContext):
+        await state.clear()
         expense_data = await exp_service.JSONExpenseReportService().execute(
             message.from_user.id, self.api_client
         )
@@ -164,12 +164,10 @@ class ExpenseUpdateHandler:
     async def _handle_field_input(
         self, message: Message, state: FSMContext, field: str, next_state: str = None
     ):
-        value = message.text
-        if value:
-            valid_value = VALIDATORS[field](value)
-            if not valid_value:
-                return await message.answer(self.messages.get(f"invalid_{field}"))
-            await state.update_data({field: valid_value})
+        success = await super()._handle_field_input(message, state, field)
+        if not success:
+            return
+
         if next_state:
             await self._send_next(message, state, next_state)
         else:
@@ -179,21 +177,25 @@ class ExpenseUpdateHandler:
         field = exp_fsm.get_field_from_state(next_state)
         text, skip_callback = self.messages.get_step_message(field)
 
-        keyboard = InlineKeyboardBuilder()
-        keyboard.button(text="⏭️ Пропустити", callback_data=skip_callback)
+        keyboard = self._build_skip_keyboard(skip_callback)
 
         await state.set_state(next_state)
-        await message.answer(text, reply_markup=keyboard.as_markup())
+        await message.answer(text, reply_markup=keyboard)
+
+    def _build_skip_keyboard(self, skip_callback: str):
+        keyboard = InlineKeyboardBuilder()
+        keyboard.button(text="⏭️ Пропустити", callback_data=skip_callback)
+        return keyboard.as_markup()
 
     async def _finalize_update(self, message: Message, state: FSMContext):
         data = await state.get_data()
         expense_id = data.pop("id")
 
         if data:
-            service = exp_service.ExpenseUpdateService(
+            service = exp_service.ExpenseMutationService(
                 self.api_client, message.from_user.id
             )
-            updated_expense: Dict = await service.update_expense(data, expense_id)
+            updated_expense: Dict = await service.update(expense_id, data)
 
             await message.answer(
                 self.messages.get("success_update").format(
