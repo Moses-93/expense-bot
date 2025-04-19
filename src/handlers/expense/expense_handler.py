@@ -7,27 +7,19 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from src.keyboards.display_data_keyboard import DisplayData
 from src.services.api_client import APIClient
-from src.utils.expense_validators import (
-    date_validator,
-    amount_validator,
-    name_validator,
-)
+
 from src.states import expenses
+from src.utils.message_manager import MessageManager
+from src.utils.expense_validators import date_validator
 from src.services.expense import (
     expense_service as exp_service,
     step_resolver as exp_fsm,
 )
-from src.utils.message_manager import MessageManager
+from .base_handler import BaseExpenseHandler
 from . import messages
 
 
 logger = logging.getLogger(__name__)
-
-VALIDATORS = {
-    "name": name_validator,
-    "date": date_validator,
-    "uah_amount": amount_validator,
-}
 
 
 class ExpenseCreateHandler:
