@@ -22,52 +22,100 @@ from . import messages
 logger = logging.getLogger(__name__)
 
 
-class ExpenseCreateHandler:
-
-    def __init__(self, fsm_service: add_expense_fsm.AddExpenseFSMService):
-        self.fsm_service = fsm_service
+class ExpenseCreateHandler(BaseExpenseHandler):
+    def __init__(self, api_client: APIClient):
+        super().__init__(api_client, messages.ADD_EXPENSE_MESSAGES)
 
     async def handle_add_expense(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.start(state)
-        await message.answer(msg, parse_mode="Markdown")
+        await state.clear()
+        await state.set_state(expenses.AddExpenseStates.ADD_EXPENSE_NAME)
+        await message.answer(self.messages.get("start"), parse_mode="Markdown")
 
     async def handle_set_expense_name(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.set_name(state, message.text)
-        await message.answer(msg, parse_mode="Markdown")
+        success = await self._handle_field_input(
+            message,
+            state,
+            field="name",
+        )
+        if success:
+            await state.set_state(expenses.AddExpenseStates.ADD_EXPENSE_DATE),
+
+        await message.answer(self.messages.get("set_date"), parse_mode="Markdown")
 
     async def handle_set_expense_date(self, message: Message, state: FSMContext):
-        """Handle the 'Додати витрату' button."""
-        msg = await self.fsm_service.set_date(state, message.text)
-        await message.answer(msg, parse_mode="Markdown")
+        success = await self._handle_field_input(
+            message,
+            state,
+            field="date",
+        )
+        if success:
+            await state.set_state(expenses.AddExpenseStates.ADD_EXPENSE_AMOUNT),
+        await message.answer(self.messages.get("set_amount"), parse_mode="Markdown")
 
     async def handle_set_expense_amount(self, message: Message, state: FSMContext):
-        """Handle the 'Додати витрату' button."""
-        msg = await self.fsm_service.set_amount(
-            state, message.from_user.id, message.text
+        await self._handle_field_input(message, state, field="uah_amount")
+
+        await self._finalize_creation(message, state)
+
+    async def _finalize_creation(self, message: Message, state: FSMContext):
+        data = await state.get_data()
+        logger.debug(f"{data=}")
+        service = exp_service.ExpenseMutationService(
+            self.api_client, message.from_user.id
         )
-        await message.answer(msg, parse_mode="Markdown")
+        created_expense = await service.create(data)
+        await message.answer(
+            self.messages.get("success_create").format(
+                name=created_expense.get("name", "-"),
+                date=created_expense.get("date", "-"),
+                amount=created_expense.get("uah_amount", "-"),
+            )
+        )
+        await state.clear()
 
 
-class ExpenseGetReportHandler:
+class ExpenseGetReportHandler(BaseExpenseHandler):
+    def __init__(self, api_client: APIClient):
+        super().__init__(api_client, messages.GET_EXPENSE_MESSAGES)
 
-    def __init__(self, fsm_service: get_expense_report_fsm.GetReportFSMService):
-        self.fsm_service = fsm_service
+    def _get_validator(self, field: str):
+        if field in ("start_date", "end_date"):
+            return date_validator
+        return super()._get_validator(field)
 
-    async def handle_start_expense_report(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.start(state)
-        await message.answer(msg, parse_mode="Markdown")
+    async def handle_start(self, message: Message, state: FSMContext):
+        await state.clear()
+        await state.set_state(expenses.GetExpensesReportStates.START_DATE)
+        await message.answer(self.messages.get("start"), parse_mode="Markdown")
 
-    async def handle_set_report_start_date(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.set_start_date(message.text, state)
-        await message.answer(msg, parse_mode="Markdown")
+    async def handle_set_start_date(self, message: Message, state: FSMContext):
+        is_valid = await self._handle_field_input(message, state, "start_date")
+        if is_valid:
+            await state.set_state(expenses.GetExpensesReportStates.END_DATE)
+            await message.answer(
+                self.messages.get("set_end_date"), parse_mode="Markdown"
+            )
+
+    async def handle_set_end_date(self, message: Message, state: FSMContext):
+        is_valid = await self._handle_field_input(message, state, "end_date")
+        if is_valid:
+            await self.handle_generate_expense_report(message, state)
 
     async def handle_generate_expense_report(self, message: Message, state: FSMContext):
-        msg, report = await self.fsm_service.set_end_date(
-            message.from_user.id, message.text, state
-        )
-        if report:
-            return await message.answer_document(report, caption=msg)
-        await message.answer(msg)
+        data = await state.get_data()
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+
+        await state.clear()
+
+        try:
+            service = exp_service.FileExpenseReportService("xlsx", start_date, end_date)
+            report_file = await service.execute(
+                user_id=message.from_user.id, api_client=self.api_client
+            )
+            await message.answer_document(report_file)
+        except ValueError as e:
+            await message.answer(str(e))
 
 
 class ExpenseUpdateHandler:
@@ -161,20 +209,29 @@ class ExpenseUpdateHandler:
 
 
 class ExpenseDeleteHandler:
-
-    def __init__(self, fsm_service: delete_expense_fsm.DeleteFSMService):
-        self.fsm_service = fsm_service
+    def __init__(self, api_client: APIClient):
+        self.api_client = api_client
+        self.messages = MessageManager(messages.DELETE_EXPENSE_MESSAGES)
 
     async def start(self, message: Message, state: FSMContext):
-        msg, report = await self.fsm_service.start_delete_expense(
-            message.from_user.id, state
+        await state.clear()
+        expense_data = await exp_service.JSONExpenseReportService().execute(
+            message.from_user.id, self.api_client
         )
-        if report:
-            return await message.answer_document(report, caption=msg)
-        await message.answer(msg)
+        expense_keyboard = DisplayData.generate_keyboard(
+            expense_data, ("name", "date", "uah_amount"), ("id",)
+        )
+        await state.set_state(expenses.DeleteExpenseStates.EXPENSE_ID)
+        await message.answer(self.messages.get("start"), reply_markup=expense_keyboard)
 
-    async def handle_delete_expense(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.delete_expense(
-            message.from_user.id, message.text, state
+    async def handle_delete_expense(self, callback: CallbackQuery, state: FSMContext):
+
+        service = exp_service.ExpenseMutationService(
+            self.api_client, callback.from_user.id
         )
-        await message.answer(msg, parse_mode="Markdown")
+        await service.delete(callback.data)
+
+        await callback.message.answer(
+            self.messages.get("success_delete"), parse_mode="Markdown"
+        )
+        await state.clear()
