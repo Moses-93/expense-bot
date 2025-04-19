@@ -1,16 +1,33 @@
 import logging
+from typing import Dict
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from src.fsm.expense import (
-    add_expense_fsm,
-    update_expense_fsm,
-    delete_expense_fsm,
-    get_expense_report_fsm,
+from src.keyboards.display_data_keyboard import DisplayData
+from src.services.api_client import APIClient
+from src.utils.expense_validators import (
+    date_validator,
+    amount_validator,
+    name_validator,
 )
+from src.states import expenses
+from src.services.expense import (
+    expense_service as exp_service,
+    step_resolver as exp_fsm,
+)
+from src.utils.message_manager import MessageManager
+from . import messages
+
 
 logger = logging.getLogger(__name__)
+
+VALIDATORS = {
+    "name": name_validator,
+    "date": date_validator,
+    "uah_amount": amount_validator,
+}
 
 
 class ExpenseCreateHandler:
@@ -62,39 +79,93 @@ class ExpenseGetReportHandler:
 
 
 class ExpenseUpdateHandler:
-
-    def __init__(self, fsm_service: update_expense_fsm.UpdateFSMService):
-        self.fsm_service = fsm_service
+    def __init__(self, api_client: APIClient):
+        self.api_client = api_client
+        self.messages = MessageManager(messages.UPDATE_EXPENSE_MESSAGES)
 
     async def handle_start_update_expense(self, message: Message, state: FSMContext):
-        msg, report = await self.fsm_service.start_update_expenses(
-            message.from_user.id, state
+        expense_data = await exp_service.JSONExpenseReportService().execute(
+            message.from_user.id, self.api_client
         )
-        if report:
-            return await message.answer_document(report, caption=msg)
-        await message.answer(msg)
-
-    async def set_expense_id(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.set_expense_id(
-            message.from_user.id, message.text, state
+        expense_keyboard = DisplayData.generate_keyboard(
+            expense_data, ("name", "date", "uah_amount"), ("id",)
         )
-        await message.answer(msg, parse_mode="Markdown")
+        await state.set_state(expenses.UpdateExpenseStates.EXPENSE_ID)
+        await message.answer(self.messages.get("start"), reply_markup=expense_keyboard)
 
-    async def set_new_expense_name(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.set_new_name(message.text, state)
-        await message.answer(text=msg, parse_mode="Markdown")
-
-    async def set_new_expense_date(self, message: Message, state: FSMContext):
-        msg = await self.fsm_service.set_new_date(
-            message.from_user.id, message.text, state
+    async def set_expense_id(self, callback: CallbackQuery, state: FSMContext):
+        await state.update_data(id=callback.data)
+        await self._send_next(
+            callback.message, state, expenses.UpdateExpenseStates.NAME
         )
-        await message.answer(text=msg, parse_mode="Markdown")
 
-    async def handle_update_expense(self, callback: CallbackQuery, state: FSMContext):
-        msg = await self.fsm_service.set_expense_id(
-            callback.from_user.id, callback.data, state
+    async def handle_set_name(self, message: Message, state: FSMContext):
+        await self._handle_field_input(
+            message, state, "name", expenses.UpdateExpenseStates.DATE
         )
-        await callback.message.answer(text=msg, parse_mode="Markdown")
+
+    async def handle_set_date(self, message: Message, state: FSMContext):
+        await self._handle_field_input(
+            message, state, "date", expenses.UpdateExpenseStates.AMOUNT
+        )
+
+    async def handle_set_amount(self, message: Message, state: FSMContext):
+        await self._handle_field_input(message, state, "uah_amount")
+
+    async def handle_skip(self, callback: CallbackQuery, state: FSMContext):
+        current_state = await state.get_state()
+        next_state = exp_fsm.next_step(current_state)
+
+        if next_state:
+            await self._send_next(callback.message, state, next_state)
+        else:
+            await self._finalize_update(callback.message, state)
+
+    async def _handle_field_input(
+        self, message: Message, state: FSMContext, field: str, next_state: str = None
+    ):
+        value = message.text
+        if value:
+            valid_value = VALIDATORS[field](value)
+            if not valid_value:
+                return await message.answer(self.messages.get(f"invalid_{field}"))
+            await state.update_data({field: valid_value})
+        if next_state:
+            await self._send_next(message, state, next_state)
+        else:
+            await self._finalize_update(message, state)
+
+    async def _send_next(self, message: Message, state: FSMContext, next_state: str):
+        field = exp_fsm.get_field_from_state(next_state)
+        text, skip_callback = self.messages.get_step_message(field)
+
+        keyboard = InlineKeyboardBuilder()
+        keyboard.button(text="⏭️ Пропустити", callback_data=skip_callback)
+
+        await state.set_state(next_state)
+        await message.answer(text, reply_markup=keyboard.as_markup())
+
+    async def _finalize_update(self, message: Message, state: FSMContext):
+        data = await state.get_data()
+        expense_id = data.pop("id")
+
+        if data:
+            service = exp_service.ExpenseUpdateService(
+                self.api_client, message.from_user.id
+            )
+            updated_expense: Dict = await service.update_expense(data, expense_id)
+
+            await message.answer(
+                self.messages.get("success_update").format(
+                    name=updated_expense.get("name", " - "),
+                    date=updated_expense.get("date", " - "),
+                    amount=updated_expense.get("uah_amount", " - "),
+                )
+            )
+        else:
+            await message.answer(self.messages.get("no_changes"))
+
+        await state.clear()
 
 
 class ExpenseDeleteHandler:
