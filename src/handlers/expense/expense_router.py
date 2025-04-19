@@ -75,18 +75,27 @@ class ExpenseRouter:
             expenses.GetExpensesReportStates.END_DATE,
         )
 
-        self.router.message.register(
-            update_handler.set_expense_id, expenses.UpdateExpenseState.EXPENSE_ID
+        self.router.callback_query.register(
+            update_handler.set_expense_id, expenses.UpdateExpenseStates.EXPENSE_ID
         )
 
         self.router.message.register(
-            update_handler.set_new_expense_name, expenses.UpdateExpenseState.NAME
+            update_handler.handle_set_name, expenses.UpdateExpenseStates.NAME
         )
 
         self.router.message.register(
-            update_handler.set_new_expense_date, expenses.UpdateExpenseState.DATE
+            update_handler.handle_set_date, expenses.UpdateExpenseStates.DATE
         )
 
         self.router.message.register(
-            delete_handler.handle_delete_expense, expenses.DeleteExpenseState.EXPENSE_ID
+            update_handler.handle_set_amount, expenses.UpdateExpenseStates.AMOUNT
+        )
+
+        self.router.callback_query.register(
+            update_handler.handle_skip, F.data.startswith("skip_")
+        )
+
+        self.router.callback_query.register(
+            delete_handler.handle_delete_expense,
+            expenses.DeleteExpenseStates.EXPENSE_ID,
         )
