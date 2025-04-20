@@ -1,7 +1,7 @@
 import logging
 from aiogram import Router
 from src.services.api_client import APIClient
-from src.handlers.expense import expense_handler
+from src.handlers.expense import handlers
 from .expense_router import ExpenseRouter
 
 
@@ -14,10 +14,10 @@ class ExpenseFactory:
         self.api_client = api_client
 
     def _create_handlers(self):
-        create_handler = expense_handler.ExpenseCreateHandler(self.api_client)
-        report_handler = expense_handler.ExpenseGetReportHandler(self.api_client)
-        update_handler = expense_handler.ExpenseUpdateHandler(self.api_client)
-        delete_handler = expense_handler.ExpenseDeleteHandler(self.api_client)
+        create_handler = handlers.create.ExpenseCreateHandler(self.api_client)
+        report_handler = handlers.get.ExpenseGetReportHandler(self.api_client)
+        update_handler = handlers.update.ExpenseUpdateHandler(self.api_client)
+        delete_handler = handlers.delete.ExpenseDeleteHandler(self.api_client)
 
         return create_handler, report_handler, update_handler, delete_handler
 

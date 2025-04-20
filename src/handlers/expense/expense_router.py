@@ -2,7 +2,7 @@ import logging
 from aiogram import F, Router
 
 from src.states import expenses
-from src.handlers.expense import expense_handler
+from src.handlers.expense import handlers
 
 logger = logging.getLogger(__name__)
 
@@ -12,10 +12,10 @@ class ExpenseRouter:
 
     def __init__(
         self,
-        create_handler: expense_handler.ExpenseCreateHandler,
-        report_handler: expense_handler.ExpenseGetReportHandler,
-        update_handler: expense_handler.ExpenseUpdateHandler,
-        delete_handler: expense_handler.ExpenseDeleteHandler,
+        create_handler: handlers.create.ExpenseCreateHandler,
+        report_handler: handlers.get.ExpenseGetReportHandler,
+        update_handler: handlers.update.ExpenseUpdateHandler,
+        delete_handler: handlers.delete.ExpenseDeleteHandler,
     ):
         self.router = Router()
 
