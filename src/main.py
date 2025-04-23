@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher
 
 from src.core.config import telegram_api_token
 from src.handlers.handler_factory import HandlerFactory
+from src.core.middleware.exc_handler import ErrorHandlingMiddleware
 
 if not os.path.exists("logs"):
     os.makedirs("logs")
@@ -23,6 +24,7 @@ handler_factory = HandlerFactory()
 
 bot = Bot(token=telegram_api_token)
 dp = Dispatcher()
+dp.message.middleware(ErrorHandlingMiddleware())
 
 
 async def main():
