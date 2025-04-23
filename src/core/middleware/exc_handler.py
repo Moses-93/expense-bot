@@ -2,7 +2,7 @@ import logging
 from aiogram import BaseMiddleware
 from aiogram.types import Message, CallbackQuery
 from typing import Dict, Union
-from core.exceptions import exc_validation
+from src.core.exceptions import exc_validation
 
 logger = logging.getLogger(__name__)
 
