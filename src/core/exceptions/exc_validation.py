@@ -10,7 +10,7 @@ class InvalidAmountError(ValidationError):
     pass
 
 
-class InvalidNameError(ValidationError):
+class InvalidTitleError(ValidationError):
     pass
 
 
