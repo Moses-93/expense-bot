@@ -25,6 +25,7 @@ handler_factory = HandlerFactory()
 bot = Bot(token=telegram_api_token)
 dp = Dispatcher()
 dp.message.middleware(ErrorHandlingMiddleware())
+dp.callback_query.middleware(ErrorHandlingMiddleware())
 
 
 async def main():
