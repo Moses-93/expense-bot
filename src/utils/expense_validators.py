@@ -1,41 +1,68 @@
 from datetime import datetime
-from typing import Optional
+from src.core.exceptions.exc_validation import (
+    InvalidAmountError,
+    InvalidDateError,
+    InvalidTitleError,
+)
+from src.core.messages import ERROR_MESSAGES
 
 
-def date_validator(date_str: str) -> Optional[str]:
-    """
-    Validate if the given string represents a valid date in the specified format.
+class ExpenseValidator:
+    @staticmethod
+    def validate_title(title: str) -> str:
+        """
+        Validates the given title string.
 
-    Args:
-        date_str (str): The date string to validate
+        Args:
+            title (str): The title to validate.
 
-    Returns:
-        Optional[str]: The parsed date str in the format 'YYYY-MM-DD' if valid, None otherwise
-    """
-    try:
-        return datetime.strptime(date_str, "%d.%m.%Y").strftime("%Y-%m-%d")
-    except ValueError:
-        return None
+        Returns:
+            str: The validated title.
 
+        Raises:
+            InvalidTitleError: If the title is too short or invalid.
+        """
+        if len(title.strip()) <= 3:
+            raise InvalidTitleError(ERROR_MESSAGES["invalid_title"])
+        return title.strip()
 
-def amount_validator(amount: str) -> Optional[float]:
-    """
-    Validate if the given string represents a valid positive float number.
+    @staticmethod
+    def validate_date(date_str: str) -> str:
+        """
+        Validates and formats the given date string.
 
-    Args:
-        amount (str): The string to validate
+        Args:
+            date_str (str): The date string in 'DD.MM.YYYY' format.
 
-    Returns:
-        Optional[float]: The float value if valid and positive, None otherwise
-    """
-    try:
-        return float(amount) if float(amount) > 0 else None
-    except (ValueError, TypeError):
-        return None
+        Returns:
+            str: The date in 'YYYY-MM-DD' format.
 
+        Raises:
+            InvalidDateError: If the date format is invalid.
+        """
+        try:
+            return datetime.strptime(date_str, "%d.%m.%Y").strftime("%Y-%m-%d")
+        except ValueError:
+            raise InvalidDateError(ERROR_MESSAGES["invalid_date"])
 
-def name_validator(name: str) -> Optional[str]:
-    try:
-        return str(name) if len(str(name)) > 3 else None
-    except ValueError:
-        return None
+    @staticmethod
+    def validate_amount(amount_str: str) -> float:
+        """
+        Validates and converts the given amount string to a positive float.
+
+        Args:
+            amount_str (str): The amount string to validate.
+
+        Returns:
+            float: The validated amount.
+
+        Raises:
+            InvalidAmountError: If the amount is not a positive number.
+        """
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                raise InvalidAmountError(ERROR_MESSAGES["invalid_amount"])
+            return amount
+        except (ValueError, TypeError):
+            raise InvalidAmountError(ERROR_MESSAGES["invalid_amount"])
