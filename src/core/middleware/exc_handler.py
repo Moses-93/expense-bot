@@ -23,5 +23,5 @@ class ErrorHandlingMiddleware(BaseMiddleware):
             await send_response(event, e.message)
         except exc_validation.InvalidDateError as e:
             await send_response(event, e.message)
-        except exc_validation.InvalidNameError as e:
+        except exc_validation.InvalidTitleError as e:
             await send_response(event, e.message)
