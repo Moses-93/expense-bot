@@ -4,7 +4,8 @@ from src.core.exceptions.exc_validation import (
     InvalidDateError,
     InvalidTitleError,
 )
-from src.core.messages import ERROR_MESSAGES
+from src.core.messages.texts.error_message import ERROR_MESSAGES
+from src.core.messages.enums import ErrorMessage
 
 
 class ExpenseValidator:
@@ -23,7 +24,7 @@ class ExpenseValidator:
             InvalidTitleError: If the title is too short or invalid.
         """
         if len(title.strip()) <= 3:
-            raise InvalidTitleError(ERROR_MESSAGES["invalid_title"])
+            raise InvalidTitleError(ERROR_MESSAGES[ErrorMessage.INVALID_TITLE])
         return title.strip()
 
     @staticmethod
@@ -43,7 +44,7 @@ class ExpenseValidator:
         try:
             return datetime.strptime(date_str, "%d.%m.%Y").strftime("%Y-%m-%d")
         except ValueError:
-            raise InvalidDateError(ERROR_MESSAGES["invalid_date"])
+            raise InvalidDateError(ERROR_MESSAGES[ErrorMessage.INVALID_DATE])
 
     @staticmethod
     def validate_amount(amount_str: str) -> float:
@@ -62,7 +63,7 @@ class ExpenseValidator:
         try:
             amount = float(amount_str)
             if amount <= 0:
-                raise InvalidAmountError(ERROR_MESSAGES["invalid_amount"])
+                raise InvalidAmountError(ERROR_MESSAGES[ErrorMessage.INVALID_AMOUNT])
             return amount
         except (ValueError, TypeError):
-            raise InvalidAmountError(ERROR_MESSAGES["invalid_amount"])
+            raise InvalidAmountError(ERROR_MESSAGES[ErrorMessage.INVALID_AMOUNT])
