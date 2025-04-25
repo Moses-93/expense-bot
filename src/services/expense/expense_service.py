@@ -1,42 +1,40 @@
-from abc import ABC, abstractmethod
 import logging
-from typing import Optional, Dict, List
-from datetime import datetime
-from aiogram.types import BufferedInputFile
+from typing import Optional, Dict, List, Literal
 from yarl import URL
 
 from src.services.api_client import APIClient
+from src.models.expense_dto import (
+    ExpenseDTO,
+    ExpenseReportRequestDTO,
+    UpdateExpenseDTO,
+    ExpenseReportFile,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class BaseExpenseReportService(ABC):
+class ExpenseReportURLBuilder:
     def __init__(
-        self, start_date: Optional[str] = None, end_date: Optional[str] = None
+        self,
+        report_type: Literal["json", "xlsx"],
+        request_data: Optional[ExpenseReportRequestDTO] = None,
     ):
-        self.start_date = start_date
-        self.end_date = end_date
+        self.report_type = report_type
+        self.request_data = request_data
 
-    def _validate_dates(self):
-        if self.start_date and self.end_date:
-            start = datetime.strptime(self.start_date, "%Y-%m-%d")
-            end = datetime.strptime(self.end_date, "%Y-%m-%d")
-            if start > end:
-                raise ValueError("Початкова дата не може бути пізніше за кінцева")
-
-    def _build_query_params(self, report_type: str) -> Dict:
-        if self.start_date and self.end_date:
+    def _build_query_params(self) -> Dict:
+        if self.request_data:
             return {
-                "report_type": report_type,
-                "start_date": self.start_date,
-                "end_date": self.end_date,
+                "report_type": self.report_type,
+                "start_date": self.request_data.start_date.isoformat(),
+                "end_date": self.request_data.end_date.isoformat(),
             }
         return {
-            "report_type": report_type,
+            "report_type": self.report_type,
             "all_expenses": "true",
         }
 
-    def _build_url(self, report_type: str) -> str:
+    def build_url(self) -> str:
         base_url = "/expenses/report/"
         return str(URL(base_url).with_query(self._build_query_params(report_type)))
 
