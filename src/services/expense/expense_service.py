@@ -72,7 +72,11 @@ class FileExpenseReportService(BaseExpenseReportService):
 class ExpenseMutationService:
     def __init__(self, api_client: APIClient, user_id: int):
         self.api_client = api_client
-        self.user_id = user_id
+
+    async def get(
+        self, user_id: int, response_type: Literal["json", "bytes", "text"], url: str
+    ):
+        return await self.api_client.get(url, user_id, response_type=response_type)
 
     async def update(self, expense_id: int, data: dict) -> dict:
         return await self.api_client.patch(
@@ -82,5 +86,21 @@ class ExpenseMutationService:
     async def delete(self, expense_id: int) -> dict:
         return await self.api_client.delete(f"/expenses/{expense_id}", self.user_id)
 
-    async def create(self, expense_data: Dict):
-        return await self.api_client.post("/expenses/", self.user_id, expense_data)
+    async def create(self, user_id: int, expense_data: ExpenseDTO):
+        return await self.api_client.post("/expenses/", user_id, expense_data)
+
+
+class ReportGeneratorService:
+    def __init__(self, mutation_service: ExpenseMutationService):
+        self.mutation_service = mutation_service
+
+    async def generate_report(
+        self, user_id: int, request_data: ExpenseReportRequestDTO
+    ) -> ExpenseReportFile:
+        url = ExpenseReportURLBuilder("xlsx", request_data).build_url()
+        report_bytes = await self.mutation_service.get(user_id, "bytes", url)
+        filename = self._generate_filename(request_data)
+        return ExpenseReportFile(filename=filename, content=report_bytes)
+
+    def _generate_filename(self, request_data: ExpenseReportRequestDTO) -> str:
+        return f"ExpenseReport_{request_data.start_date}_{request_data.end_date}.xlsx"
