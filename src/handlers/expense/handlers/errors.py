@@ -2,7 +2,7 @@ import logging
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from src.core.messages.enums import ErrorMessage
-from src.utils.message_manager import MessageProvider
+from src.utils.message_provider import MessageProvider
 
 logger = logging.getLogger(__name__)
 
