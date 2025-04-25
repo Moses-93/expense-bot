@@ -36,37 +36,7 @@ class ExpenseReportURLBuilder:
 
     def build_url(self) -> str:
         base_url = "/expenses/report/"
-        return str(URL(base_url).with_query(self._build_query_params(report_type)))
-
-    @abstractmethod
-    async def execute(self, user_id: int, api_client: APIClient): ...
-
-
-class JSONExpenseReportService(BaseExpenseReportService):
-    def __init__(self, start_date=None, end_date=None):
-        super().__init__(start_date, end_date)
-
-    async def execute(self, user_id: int, api_client: APIClient) -> List[Dict]:
-        self._validate_dates()
-        url = self._build_url("json")
-        return await api_client.get(url, user_id)
-
-
-class FileExpenseReportService(BaseExpenseReportService):
-    def __init__(self, report_type: str, start_date=None, end_date=None):
-        super().__init__(start_date, end_date)
-        self.report_type = report_type
-
-    async def execute(self, user_id: int, api_client: APIClient) -> BufferedInputFile:
-        self._validate_dates()
-        url = self._build_url(self.report_type)
-        byte_data = await api_client.get(url, user_id, response_type="bytes")
-        return BufferedInputFile(byte_data, filename=self._build_filename())
-
-    def _build_filename(self) -> str:
-        if self.start_date and self.end_date:
-            return f"ExpenseReport_{self.start_date}_{self.end_date}.{self.report_type}"
-        return f"ExpenseReport_FULL.{self.report_type}"
+        return str(URL(base_url).with_query(self._build_query_params()))
 
 
 class ExpenseMutationService:
