@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict
+from typing import List, Dict, Literal
 from aiohttp import ClientSession, ClientResponseError
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ class APIClient:
         method: str,
         endpoint: str,
         chat_id: int,
-        response_type: str = "json",
+        response_type: Literal["json", "bytes", "text"] = "json",
         **kwargs,
     ):
         url = f"{self.base_url}{endpoint}"
@@ -49,7 +49,7 @@ class APIClient:
         endpoint: str,
         chat_id: int,
         params: dict = None,
-        response_type: str = "json",
+        response_type: Literal["json", "bytes", "text"] = "json",
     ) -> List[Dict] | str:
 
         return await self._make_request(
