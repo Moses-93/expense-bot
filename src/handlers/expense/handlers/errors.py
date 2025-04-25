@@ -6,6 +6,7 @@ from src.utils.message_manager import MessageProvider
 
 logger = logging.getLogger(__name__)
 
+
 class ValidationErrorHandler:
     _ERROR_MAPPING = {
         "AMOUNT": ErrorMessage.INVALID_AMOUNT,
@@ -19,10 +20,14 @@ class ValidationErrorHandler:
     async def handle_error(self, message: Message, state: FSMContext):
         current_state = await state.get_state()
         error_key = next(
-            (key for key in self._ERROR_MAPPING if key.lower() in current_state.lower()),
-            None
+            (
+                key
+                for key in self._ERROR_MAPPING
+                if key.lower() in current_state.lower()
+            ),
+            None,
         )
-        
+
         if error_key:
             error_msg = self._message_provider.get(self._ERROR_MAPPING[error_key])
             await message.answer(error_msg, parse_mode="Markdown")
