@@ -40,7 +40,7 @@ class ExpenseReportURLBuilder:
 
 
 class ExpenseMutationService:
-    def __init__(self, api_client: APIClient, user_id: int):
+    def __init__(self, api_client: APIClient):
         self.api_client = api_client
 
     async def get(
@@ -48,13 +48,16 @@ class ExpenseMutationService:
     ):
         return await self.api_client.get(url, user_id, response_type=response_type)
 
-    async def update(self, expense_id: int, data: dict) -> dict:
+    async def update(
+        self, expense_id: int, user_id: int, data: UpdateExpenseDTO
+    ) -> Dict:
+
         return await self.api_client.patch(
-            f"/expenses/{expense_id}", self.user_id, json=data
+            f"/expenses/{expense_id}", user_id, json=data.model_dump(exclude_unset=True)
         )
 
-    async def delete(self, expense_id: int) -> dict:
-        return await self.api_client.delete(f"/expenses/{expense_id}", self.user_id)
+    async def delete(self, expense_id: int, user_id: int) -> dict:
+        return await self.api_client.delete(f"/expenses/{expense_id}", user_id)
 
     async def create(self, user_id: int, expense_data: ExpenseDTO):
         return await self.api_client.post("/expenses/", user_id, expense_data)
