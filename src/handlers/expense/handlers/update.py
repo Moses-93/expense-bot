@@ -11,12 +11,6 @@ from src.states.expenses import UpdateExpenseStates
 from src.services.expense import (
     expense_service as exp_service,
 )
-from src.handlers.expense import base_handler, messages
-from src.utils.expense_validators import (
-    amount_validator,
-    date_validator,
-    name_validator,
-)
 
 
 logger = logging.getLogger(__name__)
