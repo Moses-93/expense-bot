@@ -92,7 +92,7 @@ class ExpenseKeyboardBuilder:
         row_expense_data = await self.get_expenses(user_id)
         logger.debug(f"{row_expense_data=}")
         return DisplayData.generate_keyboard(
-            row_expense_data, ("title", "date", "uah_amount"), ("id",)
+            row_expense_data, ("title", "date", "amount"), ("id",)
         )
 
     async def get_expenses(self, user_id: int):
