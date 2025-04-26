@@ -9,10 +9,6 @@ class ExpenseNotFoundError(ExpenseError):
     pass
 
 
-class ExpenseGetReportError(ExpenseError):
-    pass
-
-
 class ExpenseCreateError(ExpenseError):
     pass
 
