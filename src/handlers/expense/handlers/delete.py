@@ -23,7 +23,7 @@ class ExpenseDeleteHandler:
         self.mutation_service = mutation_service
         self.message_provider = message_provider
 
-    async def start(self, message: Message, state: FSMContext):
+    async def handle_start(self, message: Message, state: FSMContext):
         await state.clear()
 
         expense_keyboard = await self.get_expense(message.from_user.id)

@@ -29,18 +29,14 @@ class ExpenseCreateHandler:
             self.message_provider.get(AddExpenseMessage.START), parse_mode="Markdown"
         )
 
-    async def handle_set_expense_name(
-        self, message: Message, state: FSMContext, title: str
-    ):
+    async def handle_set_title(self, message: Message, state: FSMContext, title: str):
         await state.update_data(title=title)
         await state.set_state(AddExpenseStates.DATE)
         await message.answer(
             self.message_provider.get(AddExpenseMessage.SET_DATE), parse_mode="Markdown"
         )
 
-    async def handle_set_expense_date(
-        self, message: Message, state: FSMContext, date: str
-    ):
+    async def handle_set_date(self, message: Message, state: FSMContext, date: str):
         await state.update_data(date=date)
 
         await state.set_state(AddExpenseStates.AMOUNT)
@@ -49,7 +45,7 @@ class ExpenseCreateHandler:
             parse_mode="Markdown",
         )
 
-    async def handle_set_expense_amount(
+    async def handle_set_amount(
         self, message: Message, state: FSMContext, amount: float
     ):
         state_data = await state.update_data(amount=amount)
