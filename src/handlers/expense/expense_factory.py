@@ -54,7 +54,7 @@ class ExpenseFactory:
             mutation_service, keyboard_builder, messages["update"]
         )
         delete_handler = handlers.delete.ExpenseDeleteHandler(
-            mutation_service, messages["delete"]
+            mutation_service, keyboard_builder, messages["delete"]
         )
         error_handler = handlers.errors.ValidationErrorHandler(messages["error"])
 
