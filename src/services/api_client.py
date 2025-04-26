@@ -26,13 +26,18 @@ class APIClient:
             ) as response:
 
                 if response.status >= 400:
-                    text = await response.text()
-                    logger.warning(f"status: {response.status}. message: {text}")
+                    error_data = await response.json()
+                    error_message = error_data.get("detail", "Unknown error")
+
+                    logger.warning(
+                        f"status: {response.status}. message: {error_message}"
+                    )
+
                     raise ClientResponseError(
                         request_info=response.request_info,
                         history=response.history,
                         status=response.status,
-                        message=text,
+                        message=error_message,
                     )
 
                 match response_type:
