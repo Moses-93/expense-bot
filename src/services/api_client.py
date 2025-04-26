@@ -32,6 +32,7 @@ class APIClient:
                         request_info=response.request_info,
                         history=response.history,
                         status=response.status,
+                        message=text,
                     )
 
                 match response_type:
