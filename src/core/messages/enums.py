@@ -31,6 +31,7 @@ class ErrorMessage(str, Enum):
     INVALID_TITLE = auto()
     INVALID_DATE = auto()
     INVALID_AMOUNT = auto()
+    INVALID_DATA = auto()
     UPDATE_ERROR = auto()
     DELETE_ERROR = auto()
     REPORT_ERROR = auto()
