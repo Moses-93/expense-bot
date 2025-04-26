@@ -4,9 +4,9 @@ from aiogram.fsm.state import State, StatesGroup
 class AddExpenseStates(StatesGroup):
     """States for adding an expense."""
 
-    ADD_EXPENSE_NAME = State()
-    ADD_EXPENSE_AMOUNT = State()
-    ADD_EXPENSE_DATE = State()
+    TITLE = State()
+    AMOUNT = State()
+    DATE = State()
 
 
 class GetExpensesReportStates(StatesGroup):
@@ -24,6 +24,13 @@ class DeleteExpenseStates(StatesGroup):
 class UpdateExpenseStates(StatesGroup):
 
     EXPENSE_ID = State()
-    NAME = State()
+    TITLE = State()
     DATE = State()
     AMOUNT = State()
+
+
+all_states = [
+    *AddExpenseStates.__state_names__,
+    *UpdateExpenseStates.__state_names__,
+    *GetExpensesReportStates.__state_names__,
+]
