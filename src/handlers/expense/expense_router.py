@@ -1,8 +1,15 @@
 import logging
 from aiogram import F, Router
+from aiogram.filters import StateFilter
 
 from src.states import expenses
 from src.handlers.expense import handlers
+from src.utils.filters import (
+    AmountValidatorFilter,
+    DateValidatorFilter,
+    TitleValidatorFilter,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +23,12 @@ class ExpenseRouter:
         report_handler: handlers.get.ExpenseGetReportHandler,
         update_handler: handlers.update.ExpenseUpdateHandler,
         delete_handler: handlers.delete.ExpenseDeleteHandler,
+        error_handler: handlers.errors.ValidationErrorHandler,
     ):
         self.router = Router()
         self.create_handler = create_handler
         self.report_handler = report_handler
+        self.error_handler = error_handler
         self.update_handler = update_handler
         self.delete_handler = delete_handler
 
@@ -48,27 +57,32 @@ class ExpenseRouter:
 
         self.router.message.register(
             self.create_handler.handle_set_expense_name,
-            expenses.AddExpenseStates.ADD_EXPENSE_NAME,
+            expenses.AddExpenseStates.TITLE,
+            TitleValidatorFilter(),
         )
 
         self.router.message.register(
             self.create_handler.handle_set_expense_amount,
-            expenses.AddExpenseStates.ADD_EXPENSE_AMOUNT,
+            expenses.AddExpenseStates.AMOUNT,
+            AmountValidatorFilter(),
         )
 
         self.router.message.register(
             self.create_handler.handle_set_expense_date,
-            expenses.AddExpenseStates.ADD_EXPENSE_DATE,
+            expenses.AddExpenseStates.DATE,
+            DateValidatorFilter(),
         )
 
         self.router.message.register(
             self.report_handler.handle_set_start_date,
             expenses.GetExpensesReportStates.START_DATE,
+            DateValidatorFilter(),
         )
 
         self.router.message.register(
             self.report_handler.handle_set_end_date,
             expenses.GetExpensesReportStates.END_DATE,
+            DateValidatorFilter(),
         )
 
         self.router.callback_query.register(
@@ -76,15 +90,21 @@ class ExpenseRouter:
         )
 
         self.router.message.register(
-            self.update_handler.handle_set_name, expenses.UpdateExpenseStates.NAME
+            self.update_handler.handle_set_title,
+            expenses.UpdateExpenseStates.TITLE,
+            TitleValidatorFilter(),
         )
 
         self.router.message.register(
-            self.update_handler.handle_set_date, expenses.UpdateExpenseStates.DATE
+            self.update_handler.handle_set_date,
+            expenses.UpdateExpenseStates.DATE,
+            DateValidatorFilter(),
         )
 
         self.router.message.register(
-            self.update_handler.handle_set_amount, expenses.UpdateExpenseStates.AMOUNT
+            self.update_handler.handle_set_amount,
+            expenses.UpdateExpenseStates.AMOUNT,
+            AmountValidatorFilter(),
         )
 
         self.router.callback_query.register(
@@ -94,4 +114,13 @@ class ExpenseRouter:
         self.router.callback_query.register(
             self.delete_handler.handle_delete_expense,
             expenses.DeleteExpenseStates.EXPENSE_ID,
+        )
+
+        self.router.message.register(
+            self.error_handler.handle_error,
+            expenses.AddExpenseStates.AMOUNT,
+        )
+
+        self.router.message.register(
+            self.error_handler.handle_error, StateFilter(*expenses.all_states)
         )
