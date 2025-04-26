@@ -62,7 +62,7 @@ class ExpenseCreateHandler:
         await self.mutation_service.create(message.from_user.id, expense_data)
         await message.answer(
             self.message_provider.get(AddExpenseMessage.SUCCESS).format(
-                name=expense_data.title,
+                title=expense_data.title,
                 date=expense_data.date.isoformat(),
                 amount=expense_data.amount,
             ),
