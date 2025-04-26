@@ -54,14 +54,14 @@ class ExpenseMutationService:
     ) -> Dict:
 
         return await self.api_client.patch(
-            f"/expenses/{expense_id}", user_id, json=data.model_dump(exclude_unset=True)
+            f"/expenses/{expense_id}", user_id, json=data.model_dump(exclude_unset=True, mode="json")
         )
 
     async def delete(self, expense_id: int, user_id: int) -> dict:
         return await self.api_client.delete(f"/expenses/{expense_id}", user_id)
 
     async def create(self, user_id: int, expense_data: ExpenseDTO):
-        return await self.api_client.post("/expenses/", user_id, expense_data)
+        return await self.api_client.post("/expenses/", user_id, expense_data.model_dump(mode="json"))
 
 
 class ReportGeneratorService:
