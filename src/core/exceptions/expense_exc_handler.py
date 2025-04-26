@@ -1,5 +1,5 @@
 import logging
-from typing import Callable
+from typing import Callable, Literal
 from functools import wraps
 from aiohttp import ClientResponseError
 from . import expense_exc
@@ -16,7 +16,7 @@ exceptions = {
 }
 
 
-def handle_client_error(operation: str):
+def handle_client_error(operation: Literal["get", "create", "update", "delete"]):
     def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
