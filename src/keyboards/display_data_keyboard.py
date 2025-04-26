@@ -13,8 +13,8 @@ class DisplayData:
         keyboard = [
             [
                 InlineKeyboardButton(
-                    text=" - ".join(str(i[key]) for key in text_keys),
-                    callback_data=f"{" ".join(str(i[key]) for key in callback_key)}",
+                    text=" - ".join(str(i.get(key, "...")) for key in text_keys),
+                    callback_data=f"{" ".join(str(i.get(key, "...")) for key in callback_key)}",
                 )
             ]
             for i in data
