@@ -35,8 +35,9 @@ class ExpenseRouter:
         self._register_handlers()
 
     def _register_handlers(self):
+
         self.router.message.register(
-            self.create_handler.handle_add_expense,
+            self.create_handler.handle_start,
             F.text == "➕ Додати витрату",
         )
 
@@ -46,29 +47,29 @@ class ExpenseRouter:
         )
 
         self.router.message.register(
-            self.update_handler.handle_start_update_expense,
+            self.update_handler.handle_start,
             F.text == "✏️ Редагувати витрату",
         )
 
         self.router.message.register(
-            self.delete_handler.start,
+            self.delete_handler.handle_start,
             F.text == "❌ Видалити витрату",
         )
 
         self.router.message.register(
-            self.create_handler.handle_set_expense_name,
+            self.create_handler.handle_set_title,
             expenses.AddExpenseStates.TITLE,
             TitleValidatorFilter(),
         )
 
         self.router.message.register(
-            self.create_handler.handle_set_expense_amount,
+            self.create_handler.handle_set_amount,
             expenses.AddExpenseStates.AMOUNT,
             AmountValidatorFilter(),
         )
 
         self.router.message.register(
-            self.create_handler.handle_set_expense_date,
+            self.create_handler.handle_set_date,
             expenses.AddExpenseStates.DATE,
             DateValidatorFilter(),
         )
