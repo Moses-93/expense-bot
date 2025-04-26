@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 exceptions = {
     "get": expense_exc.ExpenseNotFoundError,
-    "get_report": expense_exc.ExpenseGetReportError,
     "create": expense_exc.ExpenseCreateError,
     "update": expense_exc.ExpenseUpdateError,
     "delete": expense_exc.ExpenseDeleteError,
