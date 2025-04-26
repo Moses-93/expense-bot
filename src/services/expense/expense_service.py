@@ -2,6 +2,7 @@ import logging
 from typing import Optional, Dict, List, Literal
 from yarl import URL
 
+from src.keyboards.display_data_keyboard import DisplayData
 from src.services.api_client import APIClient
 from src.models.expense_dto import (
     ExpenseDTO,
@@ -77,3 +78,20 @@ class ReportGeneratorService:
 
     def _generate_filename(self, request_data: ExpenseReportRequestDTO) -> str:
         return f"ExpenseReport_{request_data.start_date}_{request_data.end_date}.xlsx"
+
+
+class ExpenseKeyboardBuilder:
+    def __init__(self, mutation_service: ExpenseMutationService):
+        self.mutation_service = mutation_service
+
+    async def build_keyboard(self, user_id: int):
+        row_expense_data = await self.get_expenses(user_id)
+        logger.debug(f"{row_expense_data=}")
+        return DisplayData.generate_keyboard(
+            row_expense_data, ("title", "date", "uah_amount"), ("id",)
+        )
+
+    async def get_expenses(self, user_id: int):
+        url = ExpenseReportURLBuilder("json").build_url()
+        logger.debug(f"{url=}")
+        return await self.mutation_service.get(user_id, "json", url)
