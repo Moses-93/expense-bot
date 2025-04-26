@@ -1,9 +1,10 @@
 import logging
-from typing import Optional, Dict, List, Literal
+from typing import Optional, Dict, Literal
 from yarl import URL
 
 from src.keyboards.display_data_keyboard import DisplayData
 from src.services.api_client import APIClient
+from src.core.exceptions.expense_exc_handler import handle_client_error
 from src.models.expense_dto import (
     ExpenseDTO,
     ExpenseReportRequestDTO,
@@ -44,11 +45,13 @@ class ExpenseMutationService:
     def __init__(self, api_client: APIClient):
         self.api_client = api_client
 
+    @handle_client_error("get")
     async def get(
         self, user_id: int, response_type: Literal["json", "bytes", "text"], url: str
     ):
         return await self.api_client.get(url, user_id, response_type=response_type)
 
+    @handle_client_error("update")
     async def update(
         self, expense_id: int, user_id: int, data: UpdateExpenseDTO
     ) -> Dict:
@@ -59,9 +62,11 @@ class ExpenseMutationService:
             json=data.model_dump(exclude_unset=True, mode="json"),
         )
 
+    @handle_client_error("delete")
     async def delete(self, expense_id: int, user_id: int) -> dict:
         return await self.api_client.delete(f"/expenses/{expense_id}", user_id)
 
+    @handle_client_error("create")
     async def create(self, user_id: int, expense_data: ExpenseDTO):
         return await self.api_client.post(
             "/expenses/", user_id, expense_data.model_dump(mode="json")
